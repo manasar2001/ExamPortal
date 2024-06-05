@@ -1,0 +1,49 @@
+<?php
+// Assuming this PHP script is being used to handle form submission
+
+$res = array(); // Initialize response array
+
+// Validate if all required fields are filled
+if(empty($_POST['exFullname'])) {
+    $res[] = "Fullname is required";
+}
+if(empty($_POST['exCourse'])) {
+    $res[] = "Course is required";
+}
+if(empty($_POST['exGender'])) {
+    $res[] = "Gender is required";
+}
+if(empty($_POST['exBdate'])) {
+    $res[] = "Birthdate is required";
+}
+if(empty($_POST['exYrlvl'])) {
+    $res[] = "Year level is required";
+}
+if(empty($_POST['exEmail'])) {
+    $res[] = "Email is required";
+} elseif (!preg_match("/^\S+@\S+\.\S+$/", $_POST['exEmail'])) {
+    $res[] = "Invalid email format";
+}
+
+// Validate password strength (example: at least 8 characters)
+if(strlen($_POST['exPass']) < 8) {
+    $res[] = "Password must be at least 8 characters long";
+}
+
+// If any validation fails, return the error messages
+if (!empty($res)) {
+    echo json_encode(array("res" => "failed", "messages" => $res));
+    exit; // Stop execution if validation fails
+}
+
+// If all validations pass, proceed with the database update
+include("../../../conn.php");
+extract($_POST);
+
+$updCourse = $conn->query("UPDATE examinee_tbl SET exmne_fullname='$exFullname', exmne_course='$exCourse', exmne_gender='$exGender', exmne_birthdate='$exBdate', exmne_year_level='$exYrlvl', exmne_email='$exEmail', exmne_password='$exPass' WHERE exmne_id='$exmne_id' ");
+if($updCourse) {
+    echo json_encode(array("res" => "success", "exFullname" => $exFullname));
+} else {
+    echo json_encode(array("res" => "failed", "message" => "Database update failed"));
+}
+?>
